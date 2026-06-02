@@ -559,6 +559,39 @@ class TestCustom(parameterized.TestCase):
     self.assertEqual(output.shape[1], expected_height)
     self.assertEqual(output.shape[2], expected_width)
 
+  def test_pad_to_size_hwc_shape(self):
+    image = jnp.zeros((4, 4, 3))
+    result = augment.pad_to_size(
+        image, target_height=6, target_width=6, channel_axis=-1
+    )
+    self.assertEqual(result.shape, (6, 6, 3))
+
+  def test_pad_to_size_chw_shape(self):
+    image = jnp.zeros((3, 4, 4))
+    result = augment.pad_to_size(
+        image, target_height=6, target_width=6, channel_axis=0
+    )
+    self.assertEqual(result.shape, (3, 6, 6))
+
+  def test_pad_to_size_chw_values(self):
+    image = jnp.ones((1, 1, 1))
+    result = augment.pad_to_size(
+        image, target_height=3, target_width=3, channel_axis=0
+    )
+    self.assertEqual(result.shape, (1, 3, 3))
+    np.testing.assert_array_equal(result[0, 1, 1], 1.0)
+    np.testing.assert_array_equal(result[0, 0, :], 0.0)
+    np.testing.assert_array_equal(result[0, 2, :], 0.0)
+    np.testing.assert_array_equal(result[0, :, 0], 0.0)
+    np.testing.assert_array_equal(result[0, :, 2], 0.0)
+
+  def test_pad_to_size_batch_chw_shape(self):
+    image = jnp.zeros((2, 3, 4, 4))
+    result = augment.pad_to_size(
+        image, target_height=6, target_width=6, channel_axis=1
+    )
+    self.assertEqual(result.shape, (2, 3, 6, 6))
+
 
 if __name__ == "__main__":
   jax.config.update("jax_default_matmul_precision", "float32")

@@ -358,7 +358,10 @@ def pad_to_size(
   top = delta_height // 2
   bottom = max(target_height - (top + height), 0)
 
-  pad_width = ((top, bottom), (left, right), (0, 0))
+  if _channels_last(image, channel_axis):
+    pad_width = ((top, bottom), (left, right), (0, 0))
+  else:
+    pad_width = ((0, 0), (top, bottom), (left, right))
   if batch:
     pad_width = ((0, 0), *pad_width)
 
